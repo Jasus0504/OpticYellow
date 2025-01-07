@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="test.com.auction">
+
+	<insert id="B_INSERT"
+		parameterType="com.peachmarket.opticyellow.bid.model.BidVO">
+		INSERT INTO auction_list(price, p_num, b_num, buyer,
+		bid_time)
+		VALUES
+		(#{price}, #{p_num}, seq_bid.nextval, #{buyer},
+		CURRENT_TIMESTAMP)
+	</insert>
+
+	<select id="B_SELECTONE_HIGH"
+		resultType="com.peachmarket.opticyellow.bid.model.BidVO">
+		SELECT al.*, a.*
+		FROM auction_list al
+		JOIN auction a ON
+		al.p_num = a.p_num
+		WHERE al.p_num = #{p_num}
+		AND (al.p_num, al.price) IN
+		(
+		SELECT p_num, MAX(price) AS max_price
+		FROM auction_list
+		GROUP BY p_num
+		)
+		AND al.bid_time = (
+		SELECT MIN(bid_time) FROM auction_list al2
+		WHERE
+		al2.p_num = al.p_num AND al2.price = al.price
+		)
+
+	</select>
+
+	<select id="B_SELECTALL"
+		resultType="com.peachmarket.opticyellow.bid.model.BidVO">
+		SELECT al.*, a.seller, a.p_pic1, a.p_name
+		FROM auction_list
+		al
+		LEFT JOIN auction a ON al.p_num = a.p_num
+	</select>
+
+	<select id="B_SELECTALL_FINALHIGH"
+		resultType="com.peachmarket.opticyellow.bid.model.BidVO">
+  <![CDATA[
+    SELECT *
+    FROM auction a
+    INNER JOIN (
+      SELECT al.p_num, MAX(al.price) AS max_price
+      FROM auction_list al
+      GROUP BY al.p_num
+    ) al ON a.p_num = al.p_num
+    WHERE a.dead_line < SYSDATE
+  ]]>
+	</select>
+
+
+
+	<select id="B_SELL_LIST"
+		resultType="com.peachmarket.opticyellow.bid.model.BidVO">
+		SELECT a.*,
+		TO_CHAR(a.p_insert_time, 'YYYY-MM-DD HH24:MI')
+		AS fp_insert_time,
+		TO_CHAR(a.dead_line, 'YYYY-MM-DD HH24:MI') AS
+		fdead_line,
+		al.*
+		FROM auction a
+		LEFT JOIN (
+		SELECT al1.*
+		FROM auction_list
+		al1
+		INNER JOIN (
+		SELECT p_num, MAX(price) AS max_price, MIN(bid_time) AS
+		min_bid_time
+		FROM auction_list
+		GROUP BY p_num
+		) al2 ON al1.p_num =
+		al2.p_num AND al1.price = al2.max_price AND
+		al1.bid_time =
+		al2.min_bid_time
+		) al ON a.p_num = al.p_num
+		WHERE a.seller = #{user_id}
+		ORDER BY a.p_insert_time DESC
+	</select>
+
+	<select id="B_BUY_LIST"
+		resultType="com.peachmarket.opticyellow.bid.model.BidVO">
+
+		SELECT al.*, a.*
+		FROM auction_list al
+		JOIN auction a ON
+		al.p_num = a.p_num
+		WHERE al.Buyer = #{user_id}
+		ORDER BY a.p_insert_time
+		desc
+	</select>
+
+	<select id="B_BOUGHT_LIST"
+		resultType="com.peachmarket.opticyellow.bid.model.BidVO">
+		SELECT al.*, a.*
+		FROM auction_list al
+		JOIN (
+		SELECT al1.p_num, al1.price, al1.buyer
+		FROM auction_list al1
+		JOIN (
+		SELECT p_num, MAX(price) AS max_price
+		FROM auction_list
+		GROUP BY p_num
+		) al_max ON al1.p_num = al_max.p_num AND al1.price = al_max.max_price
+		WHERE al1.bid_time = (
+		SELECT MIN(bid_time) FROM auction_list al2
+		WHERE al2.p_num = al1.p_num AND al2.price = al1.price
+		)
+		) al_max2 ON al.p_num = al_max2.p_num AND al.price = al_max2.price AND
+		al.bid_time = (
+		SELECT MIN(bid_time) FROM auction_list al3
+		WHERE al3.p_num = al_max2.p_num AND al3.price = al_max2.price
+		)
+		JOIN auction a ON al.p_num = a.p_num
+		WHERE a.deal_done = 'complete' AND al.buyer = #{user_id}
+	</select>
+
+	<select id="B_SOLD_LIST"
+		resultType="com.peachmarket.opticyellow.bid.model.BidVO">
+		SELECT al.*, a.*
+		FROM auction_list al
+		JOIN (
+		SELECT al1.p_num, al1.price, al1.buyer
+		FROM auction_list al1
+		JOIN (
+		SELECT p_num, MAX(price) AS max_price
+		FROM auction_list
+		GROUP BY p_num
+		) al_max ON al1.p_num = al_max.p_num AND al1.price = al_max.max_price
+		WHERE al1.bid_time = (
+		SELECT MIN(bid_time) FROM auction_list al2
+		WHERE al2.p_num = al1.p_num AND al2.price = al1.price
+		)
+		) al_max2 ON al.p_num = al_max2.p_num AND al.price = al_max2.price AND
+		al.bid_time = (
+		SELECT MIN(bid_time) FROM auction_list al3
+		WHERE al3.p_num = al_max2.p_num AND al3.price = al_max2.price
+		)
+		JOIN auction a ON al.p_num = a.p_num
+		WHERE a.deal_done = 'complete' AND a.seller = #{user_id}
+
+
+	</select>
+
+</mapper>

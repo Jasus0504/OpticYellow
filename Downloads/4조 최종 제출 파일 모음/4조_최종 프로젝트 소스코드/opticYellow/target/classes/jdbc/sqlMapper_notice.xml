@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="test.com.project.board">
+	<select id="N_SELECT_ALL" resultType="com.peachmarket.opticyellow.notice.model.NoticeVO">
+		select t.*, to_char(t.n_date, 'YYYY-MM-DD HH24:MI') as formatted_n_date
+		from (
+		    select row_number() over (order by a.n_num desc) num, a.*, mem.m_img
+		    from notice a join member mem on a.n_writer = mem.m_id
+		) t 
+		where t.num between #{startList} and #{endList}
+	</select>
+	
+	<select id="N_SELECT_ONE" resultType="com.peachmarket.opticyellow.notice.model.NoticeVO">
+		select t.*,to_char(t.n_date, 'YYYY-MM-DD HH24:MI') as formatted_n_date, mem.m_img 
+		from notice t join member mem on t.n_writer = mem.m_id
+		where t.n_num = #{n_num}
+	</select>
+	
+	<select id="TOTAL_NOTICE" resultType="java.lang.Integer">
+		select count(*) total from notice
+	</select>		
+	
+	<select id="N_SEARCH_LIST"
+		resultType="com.peachmarket.opticyellow.notice.model.NoticeVO">
+		select t.*, to_char(t.n_date, 'YYYY-MM-DD HH24:MI') as formatted_n_date
+		from (
+		    select row_number() over (order by a.n_num desc) num, a.*, mem.m_img
+		    from notice a join member mem on a.n_writer = mem.m_id
+		) t 
+		where (t.num between #{startList} and #{endList}) and (t.n_title like #{searchWord} OR t.n_content like #{searchWord})
+	</select>
+	
+	<insert id="N_INSERT" parameterType="com.peachmarket.opticyellow.notice.model.NoticeVO">
+	insert into
+		notice (n_num,n_title,n_content,n_writer)
+
+		values(n_num.nextval,#{n_title},#{n_content},#{n_writer})
+		
+	</insert>
+	
+	<update id="N_UPDATE" parameterType="com.peachmarket.opticyellow.notice.model.NoticeVO">
+		update notice set n_title=#{n_title} , n_content=#{n_content} , 
+		n_date=sysdate
+		where n_num = #{n_num}
+	</update>
+	
+	<update id="N_VCOUNT_UP" parameterType="com.peachmarket.opticyellow.notice.model.NoticeVO">
+		update notice set n_vcount=n_vcount+1
+		where n_num = #{n_num}
+	</update>
+	
+	<delete id="N_DELETE">
+		delete from notice where n_num = #{n_num}
+	</delete>
+	
+</mapper>

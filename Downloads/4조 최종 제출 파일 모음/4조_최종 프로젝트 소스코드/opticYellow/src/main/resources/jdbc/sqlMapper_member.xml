@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peachmarket.opticyellow.member">
+<!-- 서준 코드 -->
+	<select id="SELECT_ALL" resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select * from member
+	</select>
+
+	<select id="EMAIL_CHECK" resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select email from member where email = #{email}
+	</select>
+
+	<select id="MYPAGE_SELECT_ONE" resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select * from member where m_id = #{m_id}
+	</select>
+
+	<select id="SELECT_ROLE" resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select * from member where m_id = #{m_id}
+	</select>
+
+	<select id="FIND_ID" resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select * from member where name = #{name} and email = #{email}
+	</select>
+
+	<select id="FIND_PW" resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select * from member where m_id = #{m_id}
+	</select>
+
+<!-- 	<select id="M_SEARCH_LIST_NAME" resultType="test.com.project.member.model.MemberVO"> -->
+<!-- 		select * from member where name like #{searchWord} -->
+<!-- 	</select> -->
+
+<!-- 	<select id="M_SEARCH_LIST_TEL" resultType="test.com.project.member.model.MemberVO"> -->
+<!-- 		select * from member where tel like #{searchWord} -->
+<!-- 	</select> -->
+
+	<select id="LOGIN" resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select * from member where m_id = #{m_id}
+	</select>
+
+	<select id="PW_CHECK" resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select pw from member where m_id = #{m_id}
+	</select>
+	
+	<select id="ID_CHECK" resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select m_id from member where m_id = #{m_id}
+	</select>
+	
+	
+	<insert id="M_INSERT" parameterType="com.peachmarket.opticyellow.member.model.MemberVO">
+		insert into member(m_id,pw,name,gender,addr,tel,email,birth,m_ntrp,introduce,m_location,m_time,m_invite_code,m_img,m_num,role)
+		values(#{m_id},#{pw},#{name},#{gender},#{addr},#{tel},#{email},#{birth},#{m_ntrp},#{introduce},#{m_location},#{m_time},#{m_invite_code},#{m_img},member_seq.nextval,#{role})
+	</insert>
+	
+	<update id="UPDATE_PW" parameterType="com.peachmarket.opticyellow.member.model.MemberVO">
+		update member set pw=#{pw} where m_id=#{m_id}
+	</update>
+
+	<update id="UPDATE_NTRP" parameterType="com.peachmarket.opticyellow.member.model.MemberVO">
+		update member set m_ntrp=#{m_ntrp} where m_id=#{m_id}
+	</update>
+	
+	<delete id="M_DELETE" parameterType="com.peachmarket.opticyellow.member.model.MemberVO">
+		delete from member where m_num=#{m_num}
+	</delete>
+	
+</mapper>

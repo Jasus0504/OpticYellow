@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peachmarket.opticyellow.friend">
+
+	<!-- 친구 목록 -->
+	<select id="FRIEND_LIST"
+		resultType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		SELECT *
+		FROM (
+		SELECT
+		ROW_NUMBER() OVER (ORDER BY sns_num
+		DESC) AS row_num, m.*, s.*
+		FROM member m
+		JOIN sns s ON m.m_id =
+		s.m_user_id
+		WHERE s.to_user_id = #{to_user_id}
+		AND s.are_we_friend_st =1
+		) tmp
+		WHERE row_num BETWEEN #{startList} AND #{endList}
+	</select>
+
+	<!-- 친구 목록 정렬 -->
+	<select id="FRIEND_LIST_SORT"
+		resultType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		select *
+		from (
+		select m.*, s.*,
+		row_number() over (
+		<choose>
+			<when test="sortKey == 'name'">
+				order by s.m_user_id
+			</when>
+			<when test="sortKey == 'datedesc'">
+				order by s.sns_num desc
+			</when>
+			<otherwise>
+				order by s.sns_num asc
+			</otherwise>
+		</choose>
+		) as rn
+		from member m
+		join sns s on m.m_id = s.m_user_id
+		where
+		s.to_user_id = #{to_user_id}
+		and s.are_we_friend_st = 1
+		)
+		where rn
+		between #{startList} and #{endList}
+	</select>
+
+	<!-- 친구 목록 count -->
+	<select id="FRIEND_LIST_COUNT" resultType="int">
+		select count(*) as
+		listCnt
+		from member m
+		join sns s on m.m_id = s.m_user_id
+		where
+		s.to_user_id = #{to_user_id}
+		and s.are_we_friend_st = 1
+	</select>
+
+	<!-- 회원검색 전체목록 -->
+	<select id="FRIEND_MEMBER_LIST"
+		resultType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		SELECT *
+		FROM (
+		SELECT
+		ROW_NUMBER() OVER (ORDER BY m.m_num
+		DESC) AS row_num, m.*
+		FROM member m
+		WHERE m.m_id NOT IN (
+		SELECT CASE
+		WHEN m_user_id = #{to_user_id} THEN to_user_id
+		WHEN to_user_id =
+		#{to_user_id} THEN m_user_id
+		END
+		FROM sns
+		WHERE (to_user_id =
+		#{to_user_id}
+		AND are_we_friend_st = 0)
+		OR (to_user_id = #{to_user_id}
+		AND
+		are_we_friend_st = 1)
+		OR (m_user_id = #{to_user_id} AND
+		are_we_friend_st= 0)
+		OR (m_user_id = #{to_user_id} AND are_we_friend_st
+		= 1)
+		)
+		AND m_id !=#{to_user_id}
+		) tmp
+		WHERE row_num BETWEEN #{startList}
+		and #{endList}
+	</select>
+
+	<!-- 회원검색 목록 COUNT -->
+	<select id="FRIEND_MEMBER_COUNT" resultType="int">
+		select count(*) as
+		listCnt
+		from member
+		where m_id not in (
+		select case
+		when
+		m_user_id =
+		#{to_user_id} then to_user_id
+		when to_user_id =
+		#{to_user_id} then
+		m_user_id
+		end
+		from sns
+		where (to_user_id =
+		#{to_user_id} and
+		are_we_friend_st = 0)
+		or (to_user_id = #{to_user_id}
+		and
+		are_we_friend_st = 1)
+		or (m_user_id = #{to_user_id} and
+		are_we_friend_st = 0)
+		or (m_user_id = #{to_user_id} and
+		are_we_friend_st = 1)
+		)
+		and m_id !=
+		#{to_user_id}
+	</select>
+
+
+	<!-- 친구 검색 - 이름 -->
+	<select id="M_SEARCH_NAME"
+		resultType="com.peachmarket.opticyellow.friend.model.FriendVO"
+		parameterType="HashMap">
+		select *
+		from member
+		where m_id not in (
+		select case
+		when
+		m_user_id = #{to_user_id} then to_user_id
+		when to_user_id =
+		#{to_user_id} then m_user_id
+		end
+		from sns
+		where (to_user_id =
+		#{to_user_id} and are_we_friend_st = 0)
+		or (to_user_id = #{to_user_id}
+		and are_we_friend_st = 1)
+		or (m_user_id = #{to_user_id} and
+		are_we_friend_st = 0)
+		or (m_user_id = #{to_user_id} and
+		are_we_friend_st = 1)
+		)
+		and name like #{searchWord} and m_id !=
+		#{to_user_id}
+	</select>
+
+	<!-- 친구 검색 - 아이디 -->
+	<select id="M_SEARCH_ID"
+		resultType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		select *
+		from member
+		where m_id not in (
+		select case
+		when
+		m_user_id = #{to_user_id} then to_user_id
+		when to_user_id =
+		#{to_user_id} then m_user_id
+		end
+		from sns
+		where (to_user_id =
+		#{to_user_id} and are_we_friend_st = 0)
+		or (to_user_id = #{to_user_id}
+		and are_we_friend_st = 1)
+		or (m_user_id = #{to_user_id} and
+		are_we_friend_st = 0)
+		or (m_user_id = #{to_user_id} and
+		are_we_friend_st = 1)
+		)
+		and m_id like #{searchWord} and m_id !=
+		#{to_user_id}
+	</select>
+
+	<!-- 친구 검색 - NTRP -->
+	<select id="M_SEARCH_NTRP"
+		resultType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		select *
+		from member
+		where m_id not in (
+		select case
+		when
+		m_user_id = #{to_user_id} then to_user_id
+		when to_user_id =
+		#{to_user_id} then m_user_id
+		end
+		from sns
+		where (to_user_id =
+		#{to_user_id} and are_we_friend_st = 0)
+		or (to_user_id = #{to_user_id}
+		and are_we_friend_st = 1)
+		or (m_user_id = #{to_user_id} and
+		are_we_friend_st = 0)
+		or (m_user_id = #{to_user_id} and
+		are_we_friend_st = 1)
+		)
+		and m_ntrp like #{searchWord} and m_id !=
+		#{to_user_id}
+	</select>
+
+	<!-- 친구 신청 현황 -->
+	<select id="FRIEND_STATE"
+		resultType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		SELECT *
+		FROM (
+		SELECT
+		ROW_NUMBER() OVER (ORDER BY sns_num
+		DESC) AS row_num, m.*, s.*
+		FROM member m
+		JOIN sns s ON m.m_id =
+		s.to_user_id
+		WHERE s.m_user_id = #{m_user_id}
+		AND s.are_we_friend_st = 0
+		) tmp
+		WHERE row_num BETWEEN #{startList} AND #{endList}
+	</select>
+
+	<!-- 친구 신청 현황 count -->
+	<select id="FRIEND_STATE_COUNT" resultType="int">
+		select count(*) as
+		count
+		from member m
+		join sns s on m.m_id = s.to_user_id
+		where s.m_user_id
+		= #{m_user_id}
+		and s.are_we_friend_st = 0
+	</select>
+
+	<!-- 친구 신청 수락 -->
+	<update id="FRIEND_STATE_AGREE"
+		parameterType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		update sns
+		set are_we_friend_st = 1
+		where m_user_id =
+		#{m_user_id} and to_user_id = #{to_user_id}
+	</update>
+
+	<!-- 친구 신청 거절 -->
+	<delete id="FRIEND_STATE_REJECT"
+		parameterType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		delete from sns where to_user_id=#{to_user_id} and
+		m_user_id=#{m_user_id} and are_we_friend_st=0
+	</delete>
+
+	<delete id="FRIEND_REMOVE_YOU"
+		parameterType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		delete from sns where to_user_id=#{m_user_id} and
+		m_user_id=#{to_user_id} and are_we_friend_st=1
+	</delete>
+	
+	<delete id="FRIEND_REMOVE_ME"
+		parameterType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		delete from sns where to_user_id=#{to_user_id} and
+		m_user_id=#{m_user_id} and are_we_friend_st=1
+	</delete>
+
+	<!-- 친구 신청받은 사람의 친구목록에도 추가 -->
+	<insert id="FRIEND_ADDFRIEND"
+		parameterType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		insert into sns (sns_num, m_user_id, to_user_id,
+		are_we_friend_st)
+		values (sns_num.nextval, #{to_user_id}, #{m_user_id},
+		1)
+	</insert>
+
+	<!-- 친구 신청 -->
+	<insert id="FRIEND_REQUEST"
+		parameterType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		insert into sns (sns_num, m_user_id, to_user_id,
+		are_we_friend_st)
+		values (sns_num.nextval, #{m_user_id}, #{to_user_id},
+		0)
+	</insert>
+
+	<!-- 친구 추천 -->
+	<select id="FRIEND_RANDOM"
+		resultType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		select *
+		from member
+		where m_id not in (
+		select case
+		when
+		m_user_id = #{to_user_id} then to_user_id
+		when to_user_id =
+		#{to_user_id} then m_user_id
+		end
+		from sns
+		where (to_user_id =
+		#{to_user_id} and are_we_friend_st = 0)
+		or (to_user_id = #{to_user_id}
+		and are_we_friend_st = 1)
+		or (m_user_id = #{to_user_id} and
+		are_we_friend_st = 0)
+		or (m_user_id = #{to_user_id} and
+		are_we_friend_st = 1)
+		)
+		and m_id != #{to_user_id}
+	</select>
+
+	<!-- 친구 매치 목록 -->
+	<select id="FRIEND_GAME"
+		resultType="com.peachmarket.opticyellow.friend.model.FriendVO">
+		select *
+		from (
+		select s.*, g.*, m.*,
+		row_number() over (order
+		by g.g_start_dt asc) as rn
+		from sns s
+		inner join game_join j on
+		s.m_user_id = j.g_joiner
+		inner join game g on j.g_resid = g.g_num or
+		g.g_creater = s.m_user_id
+		inner join member m on m.m_id = j.g_joiner
+		where s.to_user_id = #{to_user_id}
+		and s.are_we_friend_st = 1
+		and
+		to_date(g.g_start_dt, 'YYYY-MM-DD HH24:MI') >= (SYSDATE)
+		)
+		where rn
+		between #{startList} and #{endList}
+		order by g_start_dt asc
+	</select>
+
+	<!-- 친구 매치 목록 count -->
+	<select id="FRIEND_GAME_COUNT" resultType="int">
+		select count(*) as
+		listCnt
+		from sns s
+		inner join game_join j on s.m_user_id = j.g_joiner
+		inner join game g on j.g_resid = g.g_num or g.g_creater = s.m_user_id
+		inner join member m on m.m_id = j.g_joiner
+		where s.to_user_id =
+		#{to_user_id}
+		and s.are_we_friend_st = 1
+		and to_date(g.g_start_dt,
+		'YYYY-MM-DD HH24:MI') >= (SYSDATE)
+	</select>
+
+
+</mapper>

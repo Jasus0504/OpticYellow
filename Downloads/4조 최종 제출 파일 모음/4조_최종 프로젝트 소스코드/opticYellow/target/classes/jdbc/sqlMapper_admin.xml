@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peachmarket.opticyellow.admin">
+
+	<select id="ADMINPAGE_SELECT_ONE" resultType="com.peachmarket.opticyellow.admin.model.AdminVO">
+		select * from member where m_id = #{m_id}
+	</select>
+
+	<select id="MEMBER_LIST" resultType="com.peachmarket.opticyellow.admin.model.AdminVO">
+		select *
+		  from (
+		        select row_number() over (order by m_num desc) num
+		             , a.*
+		          from member a
+		        ) 
+		 where num between #{startList} and #{endList}
+	</select>
+
+	<select id="MEMBER_TOTAL" resultType="java.lang.Integer">
+		select count(*) total from member
+	</select>
+
+	<select id="JOIN_TOTAL" resultType="java.lang.Integer">
+	    select count(*) total from
+            member mem join game_join gj on mem.m_id=gj.g_joiner
+            where mem.m_num=#{m_num}
+	</select>
+
+	<select id="COURT_RES_TOTAL" resultType="java.lang.Integer">
+		select count(*) total from
+            member mem join reserve res on mem.m_id=res.user_id
+            where mem.m_num=#{m_num}
+	</select>
+
+	<select id="MEMBER_SEARCH_NAME"
+		resultType="com.peachmarket.opticyellow.admin.model.AdminVO">
+		select * from member where name like #{searchWord}
+	</select>
+
+	<select id="MEMBER_SEARCH_ID"
+		resultType="com.peachmarket.opticyellow.admin.model.AdminVO">
+		select * from member where m_id like #{searchWord}
+	</select>	
+
+	<select id="MEMBER_INFO" resultType="com.peachmarket.opticyellow.admin.model.AdminVO">
+		select * from member where m_num = #{m_num}
+	</select>
+
+	<select id="GAME_RES_LIST" resultType="com.peachmarket.opticyellow.admin.model.AdminVO">
+		select *
+		from (
+		    select
+		        row_number() over (order by sub.row_number desc) as row_number,
+		        sub.g_joiner,
+		        sub.g_resid,
+		        sub.g_name,
+		        sub.g_amount,
+		        sub.g_open,
+		        sub.g_num,
+		        sub.fac_name
+		    from (
+		        select
+		            row_number() over (order by gj.g_resid) as row_number,
+		            gj.g_joiner,
+		            gj.g_resid,
+		            g.g_name,
+		            g.g_amount,
+		            g.g_open,
+		            g.g_num,
+		            fac.fac_name
+		        from
+		            facility fac
+		            join game g on fac.fac_name = g.fac_name
+		            join game_join gj on g.g_num = gj.g_num
+		            join member mem on gj.g_joiner = mem.m_id
+		        where
+		            mem.m_num = #{m_num}
+		    ) sub
+		) final_result
+		where final_result.row_number between #{startList} and #{endList}
+	</select>
+
+	<select id="COURT_RES_LIST" resultType="com.peachmarket.opticyellow.admin.model.AdminVO">
+		select *
+		from (
+		  select
+		    row_number() over (order by sub.row_number desc) as row_number,
+		    sub.m_id,
+		    sub.court_name,
+		    sub.end_time,
+		    sub.start_time,
+		    sub.reserve_no,
+		    sub.fac_id,
+		    sub.fac_name
+		  from (
+		    select
+		      mem.m_id,
+		      co.court_name,
+		      res.end_time,
+		      res.start_time,
+		      res.reserve_no,
+		      fac.fac_id,
+		      fac.fac_name,
+		      row_number() over (order by res.reserve_no) as row_number
+		    from
+		      member mem
+		      join reserve res on mem.m_id = res.user_id
+		      join court co on res.court_id = co.court_id
+		      join facility fac on co.fac_id = fac.fac_id
+		    where
+		      mem.m_num = #{m_num}
+		  ) sub
+		) final_result
+		where final_result.row_number between #{startList} and #{endList}
+	</select>
+	
+	
+	<update id="MEMBER_UPDATE" parameterType="com.peachmarket.opticyellow.admin.model.AdminVO">
+		update member set m_img=#{m_img},name=#{name},gender=#{gender},addr=#{addr},
+			tel=#{tel},email=#{email},birth=#{birth},m_ntrp=#{m_ntrp},
+			introduce=#{introduce},m_location=#{m_location},m_time=#{m_time}
+			where m_num=#{m_num}
+	</update>
+</mapper>

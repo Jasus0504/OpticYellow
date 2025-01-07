@@ -1,0 +1,99 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.calendar {
+/*     width: 100%; */
+    margin: 0 auto;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 20px; /* 둥근 테두리 추가 */
+}
+
+.calendar-yearmonth {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.calendar-controls,
+.calendar-views {
+    display: flex;
+}
+
+.calendar-controls button,
+.calendar-views button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: none;
+    background-color: #fff;
+    cursor: pointer;
+/*     border-radius: 5px; 둥근 테두리 추가 */
+}
+
+.calendar-controls button:hover,
+.calendar-views button:hover {
+/*     background-color: #ccc; */
+}
+
+.calendar-views button.active {
+    background-color: #bbb;
+}
+
+#calendar {
+/*     border: 1px solid #ddd; */
+/*     border-radius: 20px; 둥근 테두리 추가 */
+}
+
+#calendar table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#calendar th,
+#calendar td {
+    padding: 10px;
+/*     border: 1px solid #ddd; */
+    text-align: center;
+/*     border-radius: 20px; 둥근 테두리 추가 */
+}
+
+#calendar td[data-date]:hover {
+    background-color: #ccff00;
+}
+
+#calendar .today {
+    background-color: #ccff00;
+    border-radius: 50%; /* 둥근 테두리 추가 */
+    
+}
+
+#calendar .holiday {
+    color: red;
+}
+
+#calendar .sunday {
+    color: red;
+}
+
+#calendar .saturday {
+    color: #3c7def;
+}
+
+@media ( min-width : 768px) {
+	.container {
+		width: 750px;
+	}
+}
+
+@media ( min-width : 992px) {
+	.container {
+		width: 940px;
+	}
+}

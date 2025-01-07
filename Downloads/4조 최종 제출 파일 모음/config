@@ -1,0 +1,8 @@
+Include /Users/jaehu/.colima/ssh_config
+
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/my_custom_key
+    IdentitiesOnly yes
+

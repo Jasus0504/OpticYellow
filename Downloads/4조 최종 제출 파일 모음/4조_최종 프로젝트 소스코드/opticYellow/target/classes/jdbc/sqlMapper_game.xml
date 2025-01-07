@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peachmarket.opticyellow.game">
+	<select id="G_SELECT_ALL"
+		resultType="com.peachmarket.opticyellow.game.model.GameVO">
+
+		SELECT *
+		FROM game
+		WHERE to_date(g_start_dt, 'YYYY-MM-DD HH24:MI') >= (SYSDATE)
+		ORDER BY g_start_dt asc
+
+	</select>
+
+	<select id="G_SELECT_ONE"
+		resultType="com.peachmarket.opticyellow.game.model.GameVO">
+		select * from game where g_num = #{g_num}
+	</select>
+
+
+	<insert id="G_INSERT"
+		parameterType="com.peachmarket.opticyellow.game.model.GameVO">
+		insert into
+		game(g_bill,g_num,g_name,g_amount,g_start_dt,g_end_dt,g_info,g_ntrp,g_method,fac_name,c_id,g_remaining,g_creater,g_address)
+		<!-- , -->
+		values(#{g_bill},g_num.nextval,#{g_name},#{g_amount},#{g_start_dt},#{g_end_dt},#{g_info},#{g_ntrp},#{g_method},#{fac_name},#{c_id},#{g_amount},#{g_creater},#{g_address,
+		jdbcType=VARCHAR})
+		<!-- , -->
+	</insert>
+
+	<update id="G_UPDATE"
+		parameterType="com.peachmarket.opticyellow.game.model.GameVO">
+		update game set g_address=#{g_address, jdbcType=VARCHAR},
+		g_name=#{g_name} , g_amount=#{g_amount}, g_start_dt=#{g_start_dt},
+		g_end_dt=#{g_end_dt}, g_info=#{g_info}, g_ntrp=#{g_ntrp},
+		g_method=#{g_method}, fac_name=#{fac_name}, c_id=#{c_id},
+		g_bill=#{g_bill}
+		<!-- , -->
+		where g_num = #{g_num}
+	</update>
+
+	<delete id="G_DELETE">
+		delete from game where g_num = #{g_num}
+	</delete>
+
+	<select id="G_SEARCH_LIST_DATE"
+		resultType="com.peachmarket.opticyellow.game.model.GameVO">
+		select * from game where g_start_dt like #{searchWord}
+		AND to_date(g_start_dt, 'YYYY-MM-DD HH24:MI') >= (SYSDATE)
+		ORDER BY g_start_dt asc
+	</select>
+
+
+	<!-- <select id="G_SEARCH_LIST_REST" -->
+	<!-- resultType="com.peachmarket.opticyellow.game.model.GameVO"> -->
+	<!-- SELECT * FROM game -->
+	<!-- WHERE (g_address LIKE #{region} OR #{region} = '%전체%') -->
+	<!-- AND (g_ntrp >= #{ntrp}) -->
+	<!-- AND ((g_method IN ('남자복식', '남자단식') AND #{gender} = '남성') -->
+	<!-- OR (g_method IN ('여자복식', '여자단식') AND #{gender} = '여성') -->
+	<!-- OR #{gender} = '무관') -->
+	<!-- AND((#{open} = 'N' AND g_open = 'N') -->
+	<!-- OR (#{open} = 'Y' AND g_open = 'Y') -->
+	<!-- OR (#{open} = '전체') -->
+	<!-- ) -->
+	<!-- AND ((g_address LIKE #{subRegion}) OR #{subRegion} = '%상세지역%' OR #{subRegion} 
+		= '') -->
+
+	<!-- </select> -->
+	<select id="G_SEARCH_LIST_REST"
+		resultType="com.peachmarket.opticyellow.game.model.GameVO">
+		<!-- SELECT * FROM game -->
+		<!-- WHERE -->
+		<!-- (g_address LIKE #{region} OR #{region} = '%전체%' OR #{region} IS '%NULL%') -->
+		<!-- AND (g_ntrp >= #{ntrp} OR #{ntrp} IS NULL) -->
+		<!-- AND ( -->
+		<!-- (g_method IN ('남자복식', '남자단식') AND #{gender} = '남성') -->
+		<!-- OR (g_method IN ('여자복식', '여자단식') AND #{gender} = '여성') -->
+		<!-- OR #{gender} = '무관' -->
+		<!-- OR #{gender} IS NULL -->
+		<!-- ) -->
+		<!-- AND ( -->
+		<!-- (#{open} = 'N' AND g_open = 'N') -->
+		<!-- OR (#{open} = 'Y' AND g_open = 'Y') -->
+		<!-- OR #{open} = '전체' -->
+		<!-- OR #{open} IS NULL -->
+		<!-- ) -->
+		<!-- AND ( -->
+		<!-- (g_address LIKE #{subRegion}) -->
+		<!-- OR #{subRegion} = '%상세지역%' -->
+		<!-- OR #{subRegion} = '' -->
+		<!-- OR #{subRegion} IS NULL -->
+		<!-- ) -->
+
+
+
+		SELECT * FROM game
+		WHERE (g_address LIKE #{region} OR #{region} =
+		'%전체%')
+		AND (g_ntrp >= #{ntrp})
+		AND ((g_method IN ('남자복식', '남자단식') AND
+		#{gender} = '남성')
+		OR (g_method IN ('여자복식', '여자단식') AND #{gender} =
+		'여성')
+		OR #{gender} = '무관')
+		AND((#{open} = 'N' AND g_open = 'N')
+		OR
+		(#{open} = 'Y' AND g_open = 'Y')
+		OR (#{open} = '전체')
+		)
+		AND ((g_address
+		LIKE #{subRegion}) OR #{subRegion} = '%상세지역%' OR #{subRegion} = '')
+		AND (to_date(g_start_dt, 'YYYY-MM-DD HH24:MI') >= (SYSDATE))
+		ORDER BY g_start_dt asc
+
+	</select>
+
+	<select id="FACILITY_BY_FACNAME"
+		resultType="com.peachmarket.opticyellow.facman.model.FacManVO">
+		select fac_id, address from facility where
+		fac_name=#{fac_name}
+	</select>
+
+
+
+
+	<update id="REMAINING_UPDATE"
+		parameterType="com.peachmarket.opticyellow.game.model.GameVO">
+		UPDATE game
+		SET g_remaining = CASE
+		WHEN g_remaining > 0
+		THEN g_remaining - 1
+		ELSE g_remaining
+		END,
+		g_open = CASE
+		WHEN g_remaining
+		= 1 THEN 'N'
+		ELSE g_open
+		END
+		WHERE g_num = #{g_num}
+	</update>
+
+
+</mapper>

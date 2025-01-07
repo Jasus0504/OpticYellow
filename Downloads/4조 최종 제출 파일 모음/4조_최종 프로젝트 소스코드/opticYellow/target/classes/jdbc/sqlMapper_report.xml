@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="test.com.auction">
+
+	<insert id="R_INSERT"
+		parameterType="com.peachmarket.opticyellow.report.model.ReportVO">
+		insert into
+		report
+		(p_num,r_num,r_reporter,r_Date,r_name,r_info,r_reason)
+		values(#{p_num},seq_report.nextval,#{r_reporter},sysdate,#{r_name},#{r_info},#{r_reason})
+	</insert>
+
+	<select id="R_MYLIST"
+		resultType="com.peachmarket.opticyellow.report.model.ReportVO">
+		select * from report where r_reporter = #{user_id}
+	</select>
+	
+	<select id="R_SELECTONE"
+		resultType="com.peachmarket.opticyellow.report.model.ReportVO">
+		select * from report where r_num = #{r_num}
+	</select>
+	
+	<select id="R_SELECTALL"
+		resultType="com.peachmarket.opticyellow.report.model.ReportVO">
+		SELECT report.*, auction.p_name
+		FROM report
+		JOIN auction ON report.p_num = auction.p_num
+	</select>
+	
+	<update id="ADV_R_INSERT"
+		parameterType="com.peachmarket.opticyellow.report.model.ReportVO">
+		update report set
+		r_answer = #{r_answer},r_checked = 'clear'
+		where r_num = #{r_num}
+	</update>
+	
+	<select id="R_UNREAD"
+		resultType="com.peachmarket.opticyellow.report.model.ReportVO">
+		SELECT * FROM report WHERE r_checked = 'unchecked'
+	</select>
+	
+</mapper>

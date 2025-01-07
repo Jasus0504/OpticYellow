@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="test.com.project.board">
+	<select id="Q_SELECT_ALL" resultType="com.peachmarket.opticyellow.faq.model.FAQVO">
+		select t.*, to_char(t.f_date, 'YYYY-MM-DD HH24:MI') as formatted_faq_date
+		from (
+		    select row_number() over (order by a.f_num desc) num, a.*, mem.m_img
+		    from faq a join member mem on a.f_writer = mem.m_id
+		) t 
+		where t.num between #{startList} and #{endList}
+	</select>
+	
+	<select id="Q_SELECT_ONE" resultType="com.peachmarket.opticyellow.faq.model.FAQVO">
+		select t.*, to_char(t.f_date, 'YYYY-MM-DD HH24:MI') as formatted_faq_date, mem.m_img
+		from faq t join member mem on t.f_writer = mem.m_id 
+		where t.f_num = #{f_num}
+	</select>
+	
+	<select id="Q_SEARCH"
+		resultType="com.peachmarket.opticyellow.faq.model.FAQVO">
+	SELECT t.*, mem.m_img FROM faq t join member mem on t.f_writer = mem.m_id 
+	WHERE t.f_category = #{searchKey} AND (t.f_title LIKE #{searchWord} 
+	OR t.f_content LIKE #{searchWord})
+	</select>
+
+	<select id="Q_SEARCH_ALL"
+		resultType="com.peachmarket.opticyellow.faq.model.FAQVO">
+		select t.*, to_char(t.f_date, 'YYYY-MM-DD HH24:MI') as formatted_faq_date
+		from (
+		    select row_number() over (order by a.f_num desc) num, a.*, mem.m_img
+		    from faq a join member mem on a.f_writer = mem.m_id
+		) t 
+		where (t.num between #{startList} and #{endList}) and (t.f_content like #{searchWord} or t.f_title like #{searchWord})
+	</select>
+
+	<select id="Q_TOTAL" resultType="java.lang.Integer">
+		select count(*) total from faq
+	</select>	
+	
+	<insert id="Q_INSERT" parameterType="com.peachmarket.opticyellow.faq.model.FAQVO">
+	insert into
+		faq (f_num,f_category,f_title,f_content,f_writer)
+
+		values(f_num.nextval,#{f_category},#{f_title},#{f_content},#{f_writer})
+		
+	</insert>
+	
+	<update id="Q_UPDATE" parameterType="com.peachmarket.opticyellow.faq.model.FAQVO">
+		update faq set f_title=#{f_title} , f_content=#{f_content} , 
+		f_date=sysdate
+		where f_num = #{f_num}
+	</update>
+	
+	<update id="Q_VCOUNT_UP" parameterType="com.peachmarket.opticyellow.faq.model.FAQVO">
+		update faq set f_vcount=f_vcount+1
+		where f_num = #{f_num}
+	</update>
+	
+	<delete id="Q_DELETE">
+		delete from faq where f_num = #{f_num}
+	</delete>
+	
+</mapper>

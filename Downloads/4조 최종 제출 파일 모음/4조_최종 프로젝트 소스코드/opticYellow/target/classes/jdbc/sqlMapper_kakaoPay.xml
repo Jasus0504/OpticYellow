@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peachmarket.opticyellow.kakaopay">
+	
+	<!-- kakaoPayReadyVO -->
+	<select id="SELECT_TID" resultType="com.peachmarket.opticyellow.kakaopay.model.KakaoPayReadyVO">
+		select * from kakaopay where num = (select max(num) from kakaopay)
+	</select>
+
+	<insert id="INSERT_TID" parameterType="com.peachmarket.opticyellow.kakaopay.model.KakaoPayReadyVO">
+		insert into kakaopay(m_id, num, tid)
+		values(#{m_id},kakao_seq.nextval,#{tid})
+	</insert>
+
+
+	<!-- kakaoPayApproveVO -->
+	<select id="SELECT_CASH" resultType="com.peachmarket.opticyellow.kakaopay.model.KakaoPayApproveVO">
+		select cash from member where m_id=#{m_id}
+	</select>
+
+	<select id="CASH_LIST" resultType="com.peachmarket.opticyellow.kakaopay.model.KakaoPayApproveVO">
+		select * from kakaopay where m_id=#{m_id}
+	</select>
+
+	<select id="SELECT_SUCCESS" resultType="com.peachmarket.opticyellow.kakaopay.model.KakaoPayApproveVO">
+		select * from kakaopay where num = (select max(num) from kakaopay)
+	</select>
+	
+	<update id="UPDATE_SUCCESS" parameterType="com.peachmarket.opticyellow.kakaopay.model.KakaoPayApproveVO">
+		update kakaopay set
+		aid=#{aid},cid=#{cid},amount_total=#{amount_total}
+		,amount_point=#{amount_point},quantity=#{quantity},item_name=#{item_name}
+		,created_at=TO_CHAR(TO_DATE(#{created_at}, 'YYYY-MM-DD"T"HH24:MI:SS'), 'YYYY-MM-DD HH24:MI')
+        ,approved_at=TO_CHAR(TO_DATE(#{approved_at}, 'YYYY-MM-DD"T"HH24:MI:SS'), 'YYYY-MM-DD HH24:MI')
+        ,partner_order_id=#{partner_order_id}
+		,partner_user_id=#{partner_user_id},payment_method_type=#{payment_method_type}
+		where tid=#{tid}
+	</update>
+
+	<update id="UPDATE_CASH" parameterType="com.peachmarket.opticyellow.kakaopay.model.KakaoPayApproveVO">
+		update member set cash=(select sum(amount_total) from kakaopay where m_id=#{m_id}) where m_id=#{m_id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peachmarket.opticyellow.facman">
+
+	<select id="FAC_MAN_SELECT_ALL_COUNT" resultType="int">
+		select count(*) total from facility
+	</select>
+
+	<select id="FAC_MAN_SELECT_ALL"
+		resultType="com.peachmarket.opticyellow.facman.model.FacManVO">
+		select *
+		  from (
+		        select row_number() over (order by regi_time desc) num
+		             , a.*
+		          from facility a
+		        ) 
+		 where num between #{startList} and #{endList}
+	</select>
+
+	<select id="SEARCH_LIST_FACNAME"
+		resultType="com.peachmarket.opticyellow.facman.model.FacManVO">
+		select * from facility where fac_name like #{searchWord}
+	</select>
+
+	<select id="SEARCH_LIST_ADDRESS"
+		resultType="com.peachmarket.opticyellow.facman.model.FacManVO">
+		select * from facility where address like #{searchWord}
+	</select>
+
+	<select id="SEARCH_LIST_REGISTERID"
+		resultType="com.peachmarket.opticyellow.facman.model.FacManVO">
+		select * from facility where register_id like #{searchWord}
+	</select>
+
+	<select id="SEARCH_LIST_CONFIRM"
+		resultType="com.peachmarket.opticyellow.facman.model.FacManVO">
+		select * from facility where f_confirm like
+		upper(#{searchWord})
+	</select>
+
+	<delete id="DELETE">
+		delete from facility where fac_id = #{fac_id}
+	</delete>
+
+	<update id="CONFIRM">
+		update facility set f_confirm = 'Y' where fac_id =
+		#{fac_id}
+	</update>
+
+	<select id="SELECT_ONE"
+		resultType="com.peachmarket.opticyellow.facman.model.FacManVO">
+		select * from facility where fac_id = #{fac_id} order by
+		regi_time desc
+	</select>
+
+	<update id="UPDATE1">
+		update facility set fac_name = #{fac_name}, floor_type = #{floor_type},
+		court_no = #{court_no}, address = #{address}, open_time = #{open_time},
+		close_time = #{close_time}, in_or_out = #{in_or_out}, conv = #{conv},
+		come = #{come}, c_price = #{c_price} where fac_id = #{fac_id}
+	</update>
+
+	<update id="UPDATE2">
+		update facility set fac_name = #{fac_name}, floor_type = #{floor_type},
+		court_no = #{court_no}, address = #{address}, court_pic1 = #{court_pic1},
+		open_time = #{open_time}, close_time = #{close_time}, in_or_out = #{in_or_out},
+		conv = #{conv},	come = #{come}, c_price = #{c_price} where fac_id = #{fac_id}
+	</update>
+
+	<update id="UPDATE3">
+		update facility set fac_name = #{fac_name}, floor_type = #{floor_type},
+		court_no = #{court_no}, address = #{address}, court_pic2 = #{court_pic2},
+		open_time = #{open_time}, close_time = #{close_time}, in_or_out = #{in_or_out},
+		conv = #{conv}, come = #{come}, c_price = #{c_price} where fac_id = #{fac_id}
+	</update>
+
+	<update id="UPDATE4">
+		update facility set fac_name = #{fac_name}, floor_type = #{floor_type},
+		court_no = #{court_no}, address = #{address}, court_pic3 = #{court_pic3},
+		open_time = #{open_time}, close_time = #{close_time}, in_or_out = #{in_or_out},
+		conv = #{conv}, come = #{come}, c_price = #{c_price} where fac_id = #{fac_id}
+	</update>
+
+	<update id="UPDATE5">
+		update facility set fac_name = #{fac_name}, floor_type = #{floor_type},
+		court_no = #{court_no}, address = #{address}, court_pic1 = #{court_pic1},
+		court_pic2 = #{court_pic2}, open_time = #{open_time}, close_time = #{close_time},
+		in_or_out = #{in_or_out}, conv = #{conv}, come = #{come}, c_price = #{c_price}
+		where fac_id = #{fac_id}
+	</update>
+
+	<update id="UPDATE6">
+		update facility set fac_name = #{fac_name}, floor_type = #{floor_type},
+		court_no = #{court_no}, address = #{address}, court_pic1 = #{court_pic1},
+		court_pic3 = #{court_pic3}, open_time = #{open_time}, close_time = #{close_time},
+		in_or_out = #{in_or_out}, conv = #{conv}, come = #{come}, c_price = #{c_price}
+		where fac_id = #{fac_id}
+	</update>
+
+	<update id="UPDATE7">
+		update facility set fac_name = #{fac_name}, floor_type = #{floor_type},
+		court_no = #{court_no}, address = #{address}, court_pic2 = #{court_pic2},
+		court_pic3 = #{court_pic3}, open_time = #{open_time}, close_time = #{close_time},
+		in_or_out = #{in_or_out}, conv = #{conv}, come = #{come}, c_price = #{c_price}
+		where fac_id = #{fac_id}
+	</update>
+
+	<update id="UPDATE8">
+		update facility set fac_name = #{fac_name}, floor_type = #{floor_type},
+		court_no = #{court_no}, address = #{address}, court_pic1 = #{court_pic1},
+		court_pic2 = #{court_pic2}, court_pic3 = #{court_pic3}, open_time = #{open_time},
+		close_time = #{close_time}, in_or_out = #{in_or_out}, conv = #{conv}, come = #{come},
+		c_price = #{c_price} where fac_id = #{fac_id}
+	</update>
+
+
+	<insert id="INSERT_COURT_ID">
+		{call INSERT_COURT_ID(#{fac_id, jdbcType=VARCHAR,
+		mode=IN}, #{court_no,
+		jdbcType=INTEGER, mode=IN}, #{fac_name,
+		jdbcType=VARCHAR, mode=IN})}
+	</insert>
+
+</mapper>

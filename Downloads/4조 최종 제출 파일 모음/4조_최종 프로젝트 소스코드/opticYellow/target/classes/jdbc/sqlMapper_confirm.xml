@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="test.com.auction">
+
+	<select id="C_SELECTLIST_SELLER"
+		resultType="com.peachmarket.opticyellow.confirm.model.ConfirmVO">
+  <![CDATA[
+ SELECT a.*, COALESCE(l.price, a.start_price) AS price,
+       l.buyer, l.bid_time
+FROM auction a
+LEFT JOIN (
+    SELECT p_num, price, buyer, bid_time
+    FROM auction_list al1
+    WHERE (p_num, price) IN (
+        SELECT p_num, MAX(price)
+        FROM auction_list al2
+        WHERE al1.p_num = al2.p_num
+        GROUP BY p_num
+    )
+    AND bid_time = (
+        SELECT MIN(bid_time) FROM auction_list al3 
+        WHERE al3.p_num = al1.p_num AND al3.price = al1.price
+    )
+) l ON a.p_num = l.p_num
+WHERE a.dead_line < SYSDATE AND a.seller = #{seller} AND (a.s_granted != 'Ok')
+
+  ]]>
+	</select>
+
+	<select id="C_SELECTLIST_BUYER"
+		resultType="com.peachmarket.opticyellow.confirm.model.ConfirmVO">
+  <![CDATA[
+	SELECT a.*,
+    TO_CHAR(a.p_insert_time, 'YYYY-MM-DD HH24:MI') AS fp_insert_time,
+    TO_CHAR(a.dead_line, 'YYYY-MM-DD HH24:MI') AS fdead_line,
+    al.*
+	FROM auction a
+	LEFT JOIN (
+    SELECT al1.*
+    FROM auction_list al1
+    INNER JOIN (
+    SELECT p_num, MAX(price) AS max_price, MIN(bid_time) AS min_bid_time
+    FROM auction_list
+     GROUP BY p_num
+    ) al2 ON al1.p_num = al2.p_num AND al1.price = al2.max_price AND al1.bid_time = al2.min_bid_time
+	) al ON a.p_num = al.p_num
+		WHERE a.dead_line < SYSDATE AND al.buyer = #{buyer} AND a.b_granted IS NULL
+  ]]>
+	</select>
+
+	<select id="C_SELECTLIST_SELLER_INFO"
+		resultType="com.peachmarket.opticyellow.confirm.model.ConfirmVO">
+		SELECT m.addr, m.tel, al.buyer, a.b_granted
+		FROM auction_list al
+		JOIN member m ON al.Buyer = m.m_id
+		JOIN auction a ON al.p_num = a.p_num
+		WHERE al.p_num = #{p_num}
+		AND al.price = (
+		SELECT MAX(price)
+		FROM auction_list
+		WHERE p_num = #{p_num}
+		)
+		AND al.bid_time = (
+		SELECT MIN(bid_time) FROM auction_list al2
+		WHERE al2.p_num = al.p_num AND al2.price = al.price
+		)
+
+
+	</select>
+
+	<select id="C_SELECTLIST_BUYER_INFO"
+		resultType="com.peachmarket.opticyellow.confirm.model.ConfirmVO">
+  <![CDATA[
+
+ 	SELECT a.*, COALESCE(l.price, a.start_price) AS price,
+		l.buyer
+		FROM auction a
+		LEFT JOIN (
+		SELECT p_num, price, buyer
+		FROM auction_list
+		WHERE (p_num, price) IN (
+		SELECT p_num, MAX(price)
+		FROM auction_list
+		GROUP BY p_num
+		)
+		) l ON a.p_num = l.p_num
+		WHERE a.p_num = #{p_num}
+  ]]>
+	</select>
+
+	<update id="DEAL_DONE_OK"
+		parameterType="com.peachmarket.opticyellow.confirm.model.ConfirmVO">
+		update auction set
+		deal_done = 'complete'
+		where p_num =
+		#{p_num}
+	</update>
+
+
+	<select id="DEAL_DONE_CHECK"
+		resultType="com.peachmarket.opticyellow.confirm.model.ConfirmVO">
+
+		SELECT a.p_num, a.p_name, al.price, al.buyer, a.deal_done,
+		a.b_granted, a.s_granted, a.dead_line, a.p_pic1
+		FROM auction a
+		INNER JOIN (
+		SELECT al1.p_num, al1.price, al1.buyer
+		FROM auction_list al1
+		INNER JOIN (
+		SELECT p_num, MAX(price) AS max_price
+		FROM auction_list
+		GROUP BY p_num
+		) max_al ON al1.p_num = max_al.p_num AND al1.price = max_al.max_price
+		WHERE al1.bid_time = (
+		SELECT MIN(bid_time) FROM auction_list al2
+		WHERE al2.p_num = al1.p_num AND al2.price = al1.price
+		)
+		) al ON a.p_num = al.p_num
+		WHERE a.seller = #{user_id} AND a.s_granted = 'Ok' AND a.b_granted = 'Ok'
+		AND a.deal_done IS NULL
+
+	</select>
+
+</mapper>
+

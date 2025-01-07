@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peachmarket.opticyellow.qna">
+	<select id="QNA_SELECT_ALL" resultType="com.peachmarket.opticyellow.qna.model.QnaVO">
+		select t.*, to_char(t.q_date, 'YYYY-MM-DD HH24:MI') as formatted_q_date
+		from (
+		    select row_number() over (order by a.q_num desc) num, a.*, mem.m_img
+		    from QNA a join member mem on a.q_writer = mem.m_id
+		) t 
+		where (t.num between #{startList} and #{endList}) and t.q_writer = #{q_writer}
+	</select>
+
+	<select id="QNA_ALL_ADMIN" resultType="com.peachmarket.opticyellow.qna.model.QnaVO">
+		select t.*, to_char(t.q_date, 'YYYY-MM-DD HH24:MI') as formatted_q_date
+		from (
+		    select row_number() over (order by a.q_num desc) num, a.*, mem.m_img
+		    from QNA a join member mem on a.q_writer = mem.m_id
+		) t 
+		where t.num between #{startList} and #{endList}
+	</select>
+	
+	<select id="QNA_SELECT_ONE" resultType="com.peachmarket.opticyellow.qna.model.QnaVO">
+		select mem.m_img,t.*,to_char(t.q_date, 'YYYY-MM-DD HH24:MI') as formatted_q_date
+		from QNA t join member mem on t.q_writer = mem.m_id where t.Q_num = #{q_num}
+	</select>
+	
+	<select id="TOTAL_QNA" resultType="java.lang.Integer">
+		select count(*) total from QNA where q_writer = #{m_id}
+	</select>	
+	
+	<insert id="QNA_INSERT" parameterType="com.peachmarket.opticyellow.qna.model.QnaVO">
+	insert into
+		QNA (q_num,q_title,q_content,q_writer)
+
+		values(Q_num.nextval,#{q_title},#{q_content},#{q_writer})
+		
+	</insert>
+	
+	<update id="QNA_UPDATE" parameterType="com.peachmarket.opticyellow.qna.model.QnaVO">
+		update QNA set Q_title=#{q_title} , Q_content=#{q_content} , 
+		q_date=sysdate
+		where Q_num = #{q_num}
+	</update>
+	
+	
+	<delete id="QNA_DELETE">
+		delete From QNA where Q_num = #{q_num}
+	</delete>
+	
+</mapper>

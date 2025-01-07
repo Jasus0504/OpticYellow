@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peachmarket.opticyellow.allcommu">
+
+	<select id="COMMU_LIST" resultType="com.peachmarket.opticyellow.allcommu.model.AllCommuVO">
+		select t.*, to_char(t.comm_date, 'YYYY-MM-DD HH24:MI') as formatted_comm_date
+		from (
+		    select row_number() over (order by a.comm_num desc) num, a.*, mem.m_img
+		    from all_community a join member mem
+            on a.comm_id = mem.m_id
+		) t 
+		where t.num between #{startList} and #{endList}		
+	</select>
+
+	<select id="COMMU_TOTAL" resultType="java.lang.Integer">
+		select count(*) total from all_community
+	</select>
+
+	<select id="COMMU_ONE" resultType="com.peachmarket.opticyellow.allcommu.model.AllCommuVO">
+		select mem.m_img,t.*,to_char(t.comm_date, 'YYYY-MM-DD HH24:MI') as formatted_comm_date 
+		from all_community t join member mem on t.comm_id = mem.m_id where comm_num = #{comm_num}
+	</select>
+
+	<select id="FIND_LIKER" resultType="com.peachmarket.opticyellow.allcommu.model.AllCommuLikeVO">
+		select * from all_commu_like where comm_num = #{comm_num} and like_user = #{like_user}
+	</select>
+
+	<select id="COMMU_SEARCH_TITLE"
+		resultType="com.peachmarket.opticyellow.allcommu.model.AllCommuVO">
+		select t.*,to_char(t.comm_date, 'YYYY-MM-DD HH24:MI') as formatted_comm_date  
+		from all_community t where t.comm_title like #{searchWord}
+	</select>
+
+	<select id="COMMU_SEARCH_ID"
+		resultType="com.peachmarket.opticyellow.allcommu.model.AllCommuVO">
+		select t.*,to_char(t.comm_date, 'YYYY-MM-DD HH24:MI') as formatted_comm_date
+		from all_community t where t.comm_id like #{searchWord}
+	</select>
+
+	<insert id="COMMU_INSERT" parameterType="com.peachmarket.opticyellow.allcommu.model.AllCommuVO">
+		insert into all_community(comm_num, comm_id, comm_title, comm_content)
+		values(all_comm_seq.nextval,#{comm_id},#{comm_title},#{comm_content})
+	</insert>
+
+	<update id="VCOUNT_UP" parameterType="com.peachmarket.opticyellow.allcommu.model.AllCommuVO">
+		update all_community set comm_vcount = comm_vcount+1 where comm_num = #{comm_num}
+	</update>
+	
+	<update id="COMMU_UPDATE" parameterType="com.peachmarket.opticyellow.allcommu.model.AllCommuVO">
+		update all_community set comm_title = #{comm_title}, comm_content = #{comm_content} where comm_num = #{comm_num}
+	</update>
+
+	<update id="LIKES_DOWN" parameterType="com.peachmarket.opticyellow.allcommu.model.AllCommuLikeVO">
+		update all_community set comm_likes = comm_likes-1 where comm_num = #{comm_num}
+	</update>
+
+	<update id="LIKES_UP" parameterType="com.peachmarket.opticyellow.allcommu.model.AllCommuLikeVO">
+		update all_community set comm_likes = comm_likes+1 where comm_num = #{comm_num}
+	</update>
+
+	<update id="COMMU_DELETE" parameterType="com.peachmarket.opticyellow.allcommu.model.AllCommuVO">
+		delete from all_community where comm_num = #{comm_num}
+	</update>
+
+	<insert id="DISLIKE_IN" parameterType="com.peachmarket.opticyellow.allcommu.model.AllCommuLikeVO">
+		insert into all_commu_like(like_num, comm_num, like_user, likes)
+		values(commlike_num_seq.nextval,#{comm_num},#{like_user},-1)
+	</insert>
+
+	<insert id="LIKE_IN" parameterType="com.peachmarket.opticyellow.allcommu.model.AllCommuLikeVO">
+		insert into all_commu_like(like_num, comm_num, like_user, likes)
+		values(commlike_num_seq.nextval,#{comm_num},#{like_user},1)
+	</insert>
+
+	<update id="DISLIKE_UPD" parameterType="com.peachmarket.opticyellow.allcommu.model.AllCommuLikeVO">
+		update all_commu_like set likes=-1 where comm_num = #{comm_num} and like_user = #{like_user}
+	</update>
+
+	<update id="LIKE_UPD" parameterType="com.peachmarket.opticyellow.allcommu.model.AllCommuLikeVO">
+		update all_commu_like set likes=1 where comm_num = #{comm_num} and like_user = #{like_user}
+	</update>
+
+	<update id="COMM_CMT_UPD" parameterType="com.peachmarket.opticyellow.allcmt.model.AllCmtVO">
+		update all_community set comm_cmt=comm_cmt-1 where comm_num = #{comm_num}
+	</update>
+
+</mapper>

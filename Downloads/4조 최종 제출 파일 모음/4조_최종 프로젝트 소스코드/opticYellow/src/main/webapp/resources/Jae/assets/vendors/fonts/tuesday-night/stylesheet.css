@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'Tuesday Night';
+    src: url('TuesdayNight-Regular.woff2') format('woff2'),
+        url('TuesdayNight-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+

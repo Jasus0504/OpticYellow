@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="test.com.auction">
+
+	<insert id="P_INSERT"
+		parameterType="com.peachmarket.opticyellow.product.model.ProductVO">
+		insert into
+		auction(start_price,low,cat,p_num,seller,p_pic1,p_pic2,p_pic3,dead_line,p_name,p_cond,p_info,p_insert_time)
+		values(#{start_price},#{low},#{cat},seq_product.nextval,#{seller},#{p_pic1},#{p_pic2},#{p_pic3},TO_DATE(#{dead_line},'YYYY-MM-DD
+		HH24:MI'),#{p_name},#{p_cond},#{p_info},CURRENT_TIMESTAMP)
+	</insert>
+
+	<select id="P_SELECT_ALL"
+		resultType="com.peachmarket.opticyellow.product.model.ProductVO">
+		select * from auction order
+		by p_num desc
+	</select>
+
+	<select id="P_SELECT_ONE"
+		resultType="com.peachmarket.opticyellow.product.model.ProductVO">
+		SELECT a.*, COALESCE(l.price, a.start_price) AS price,
+		l.buyer, l.bid_time
+		FROM auction a
+		LEFT JOIN (
+		SELECT p_num, price, buyer, bid_time
+		FROM auction_list al1
+		WHERE (p_num, price) IN (
+		SELECT p_num, MAX(price)
+		FROM auction_list al2
+		WHERE al1.p_num = al2.p_num
+		GROUP BY p_num
+		)
+		AND bid_time = (
+		SELECT MIN(bid_time) FROM auction_list al3
+		WHERE al3.p_num = al1.p_num AND al3.price = al1.price
+		)
+		) l ON a.p_num = l.p_num
+		WHERE a.p_num = #{p_num}
+
+	</select>
+
+
+	<update id="P_UPDATE"
+		parameterType="com.peachmarket.opticyellow.product.model.ProductVO">
+		update auction set
+		start_price=#{start_price},low =
+		#{low},p_cond=#{p_cond},cat=#{cat},p_info=#{p_info}
+		,p_name=#{p_name},
+		p_pic1 = #{p_pic1}, p_pic2 = #{p_pic2},p_pic3 = #{p_pic3}
+		where
+		p_num =
+		#{p_num}
+	</update>
+
+
+	<delete id="P_DELETE"
+		parameterType="com.peachmarket.opticyellow.product.model.ProductVO">
+		delete auction
+		where
+		p_num = #{p_num}
+	</delete>
+
+	<update id="S_P_FINAL"
+		parameterType="com.peachmarket.opticyellow.product.model.ProductVO">
+		update auction set s_granted='Ok'
+		where p_num = #{p_num}
+	</update>
+
+	<update id="B_P_FINAL"
+		parameterType="com.peachmarket.opticyellow.product.model.ProductVO">
+		update auction set b_granted='Ok'
+		where p_num = #{p_num}
+	</update>
+
+	<select id="P_SEARCH"
+		resultType="com.peachmarket.opticyellow.product.model.ProductVO">
+
+		SELECT a.*, COALESCE(al.price, a.start_price) AS price,
+		al.*
+		FROM auction a
+		LEFT JOIN auction_list al ON a.p_num = al.p_num
+		WHERE a.p_name LIKE #{searchWord} AND a.cat = #{searchKey}
+		AND
+		(al.price IS NULL OR al.price = (
+		SELECT MAX(price)
+		FROM auction_list
+		WHERE p_num = a.p_num AND a.dead_line > SYSDATE
+		))
+	</select>
+
+	<select id="P_SEARCH_ALL"
+		resultType="com.peachmarket.opticyellow.product.model.ProductVO">
+
+		<![CDATA[
+		SELECT a.*, COALESCE(l.price, a.start_price) AS price
+		FROM (
+		SELECT *
+		FROM auction
+		WHERE p_name LIKE #{searchWord} AND dead_line > SYSDATE
+		ORDER BY DBMS_RANDOM.VALUE
+		) a
+		LEFT JOIN (
+		SELECT p_num, MAX(price) AS price
+		FROM auction_list
+		GROUP BY p_num
+		) l ON a.p_num = l.p_num
+		WHERE ROWNUM <= 40
+		  ]]>
+	</select>
+
+	<update id="P_VCOUNT_UP"
+		parameterType="com.peachmarket.opticyellow.product.model.ProductVO">
+		update auction set p_viewcount=p_viewcount +1
+		where p_num
+		= #{p_num}
+	</update>
+
+	<select id="VIEW_SELECTALL"
+		resultType="com.peachmarket.opticyellow.product.model.ProductVO">
+		SELECT a.*, COALESCE(l.price, a.start_price) AS price
+		FROM
+		auction a
+		LEFT JOIN
+		(
+		SELECT p_num, MAX(price) AS price
+		FROM auction_list
+		GROUP BY p_num
+		) l
+		ON a.p_num = l.p_num
+		order by p_viewcount desc
+	</select>
+
+	<select id="VIEW_SELECT8"
+		resultType="com.peachmarket.opticyellow.product.model.ProductVO">
+		 <![CDATA[
+		SELECT *
+		FROM (
+		SELECT a.*, COALESCE(l.price, a.start_price) AS price
+		FROM auction a
+		LEFT JOIN (
+		SELECT p_num, MAX(price) AS price
+		FROM auction_list
+		GROUP BY p_num
+		) l ON a.p_num = l.p_num
+		WHERE a.dead_line > SYSDATE
+		ORDER BY p_viewcount DESC
+		)
+		WHERE ROWNUM <= 8
+		  ]]>
+
+	</select>
+
+	<select id="NEW_SELECT8"
+		resultType="com.peachmarket.opticyellow.product.model.ProductVO">
+		<![CDATA[
+		SELECT *
+		FROM (
+		SELECT a.*, COALESCE(l.price, a.start_price) AS price
+		FROM auction a
+		LEFT JOIN (
+		SELECT p_num, MAX(price) AS price
+		FROM auction_list
+		GROUP BY p_num
+		) l ON a.p_num = l.p_num
+		WHERE a.dead_line > SYSDATE
+		ORDER BY a.p_num DESC
+		)
+		WHERE ROWNUM <= 8
+		]]>
+
+	</select>
+
+
+
+
+
+
+</mapper>

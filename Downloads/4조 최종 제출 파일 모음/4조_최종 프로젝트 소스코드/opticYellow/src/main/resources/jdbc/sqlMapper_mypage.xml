@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peachmarket.opticyellow.mypage">
+
+	<!-- 프로필 수정 -->
+	<update id="MYPAGE_PROFILE_UPDATE"
+		parameterType="com.peachmarket.opticyellow.member.model.MemberVO">
+		update member set m_img=#{m_img}, name=#{name},
+		introduce=#{introduce}, gender=#{gender}, m_ntrp=#{m_ntrp,
+		jdbcType=VARCHAR}
+		where m_id = #{m_id}
+	</update>
+
+	<!-- 프로필 정보 -->
+	<select id="MYPAGE_PROFILE_INFO"
+		resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select * from member where m_id = #{m_id}
+	</select>
+
+	<!--친구 프로필 -->
+	<select id="FRIEND_PROFILE"
+		resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select * from member where m_id = #{m_id}
+	</select>
+
+	<!-- 게임 목록 -->
+	<select id="MYPAGE_GAME_MYLIST"
+		resultType="com.peachmarket.opticyellow.game.model.GameVO">
+		select *
+		from game g
+		join game_join gj on g.g_num = gj.g_num
+		where gj.g_joiner = #{g_joiner}
+		order by g_start_dt asc
+	</select>
+
+	<!-- 코트 목록 -->
+	<select id="MYPAGE_COURT_MYLIST"
+		resultType="com.peachmarket.opticyellow.court.model.CourtVO">
+		select
+		r.reserve_no,r.court_id,r.user_id,r.total_fee,r.start_time,r.end_time,c.fac_id,c.court_name
+		from reserve r, court c where r.user_id=#{user_id} and
+		c.court_id=r.court_id
+	</select>
+
+	<!-- 구매 목록 -->
+	<select id="MYPAGE_BUY_LIST"
+		resultType="com.peachmarket.opticyellow.auction.model.AuctionVO">
+		SELECT al.*, a.*
+		FROM auction_list al
+		JOIN (
+		SELECT p_num,
+		MAX(price) AS max_price
+		FROM auction_list
+		GROUP BY p_num
+		) al_max ON
+		al.p_num = al_max.p_num AND al.price = al_max.max_price
+		JOIN auction a
+		ON al.p_num = a.p_num
+		WHERE a.deal_done = 'complete' AND al.Buyer =
+		#{buyer}
+
+
+	</select>
+
+	<!-- 판매 목록 -->
+	<select id="MYPAGE_SALE_LIST"
+		resultType="com.peachmarket.opticyellow.auction.model.AuctionVO">
+		SELECT al.*, a.*
+		FROM auction_list al
+		JOIN (
+		SELECT p_num,
+		MAX(price) AS max_price
+		FROM auction_list
+		GROUP BY p_num
+		) al_max ON
+		al.p_num = al_max.p_num AND al.price = al_max.max_price
+		JOIN auction a
+		ON al.p_num = a.p_num
+		WHERE a.deal_done = 'complete' AND a.Seller =
+		#{seller}
+
+	</select>
+
+	<!-- 프로필 연락처 수정 -->
+	<update id="MYPAGE_TEL_UPDATE"
+		parameterType="com.peachmarket.opticyellow.member.model.MemberVO">
+		update member set tel = #{tel}
+		where m_id = #{m_id}
+	</update>
+
+	<!-- 프로필 생년월일 수정 -->
+	<update id="MYPAGE_BIRTH_UPDATE"
+		parameterType="com.peachmarket.opticyellow.member.model.MemberVO">
+		<if test="birth != null">
+			update member set birth = #{birth, jdbcType=VARCHAR}
+		</if>
+		where m_id = #{m_id}
+	</update>
+
+	<!-- 프로필 선호지역 수정 -->
+	<update id="MYPAGE_LOCATION_UPDATE"
+		parameterType="com.peachmarket.opticyellow.member.model.MemberVO">
+		update member set m_location = #{m_location,
+		jdbcType=VARCHAR}
+		where m_id = #{m_id}
+	</update>
+
+	<!-- 프로필 선호시간 수정 -->
+	<update id="MYPAGE_TIME_UPDATE"
+		parameterType="com.peachmarket.opticyellow.member.model.MemberVO">
+		update member set m_time = #{m_time}
+		where m_id = #{m_id}
+	</update>
+
+	<!-- 프로필 비밀번호 수정 -->
+	<update id="MYPAGE_PW_UPDATE"
+		parameterType="com.peachmarket.opticyellow.member.model.MemberVO">
+		update member set pw = #{pw}
+		where m_id = #{m_id}
+	</update>
+
+	<!-- 친구초대코드 -->
+	<select id="INVITE_CODE"
+		resultType="com.peachmarket.opticyellow.member.model.MemberVO">
+		select m_invite_code from member where m_id=#{m_id}
+	</select>
+
+</mapper>

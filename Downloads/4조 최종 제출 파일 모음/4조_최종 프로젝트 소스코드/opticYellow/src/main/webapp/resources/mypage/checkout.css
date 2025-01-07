@@ -1,0 +1,29 @@
+@charset "UTF-8";
+
+<style>
+
+.container {
+	max-width: 960px;
+}
+​
+#imgSrc {
+	width: 100px;
+	border-radius: 100%;
+	margin-bottom: 20px;
+}
+​
+h1 {
+	font-family: Roboto, sans-serif;
+	font-weight: 700;
+	color: #3C7DEF;
+}
+​
+.btn, btn-primary{
+	width: 100%;
+}
+​
+.notice {
+	margin-left: 1%;
+}
+
+</style>

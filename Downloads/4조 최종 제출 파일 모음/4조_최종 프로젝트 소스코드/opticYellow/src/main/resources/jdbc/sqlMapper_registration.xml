@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peachmarket.opticyellow.registration">
+
+	<insert id="COURT_REGIST">
+		insert into facility(fac_id, fac_name, floor_type, court_no, address, court_pic1, court_pic2,
+		court_pic3, register_id, open_time, close_time, in_or_out, conv, come, c_price)
+		values('fac_id' || seq_facility.nextval, #{fac_name}, #{floor_type}, #{court_no},
+		#{address}, #{court_pic1}, #{court_pic2}, #{court_pic3}, #{register_id},
+		#{open_time}, #{close_time}, #{in_or_out}, #{conv}, #{come}, #{c_price})
+	</insert>
+
+</mapper>

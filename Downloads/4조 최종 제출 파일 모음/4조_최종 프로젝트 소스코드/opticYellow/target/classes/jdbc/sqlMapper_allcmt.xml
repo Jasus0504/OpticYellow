@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peachmarket.opticyellow.allcmt">
+
+	<select id="FIND_CMT_LIKER" resultType="com.peachmarket.opticyellow.allcmt.model.AllCmtLikeVO">
+		select * from all_cmt_like where cmt_num = #{cmt_num} and like_user = #{like_user}
+	</select>
+	
+	<select id="CMT_TOTAL" resultType="java.lang.Integer">
+		select count(*) total from all_comments where comm_num=#{comm_num}
+	</select>	
+
+	<select id="CMT_LIST" resultType="com.peachmarket.opticyellow.allcmt.model.AllCmtVO">
+		select t.m_img,t.*,to_char(t.cmt_date, 'YYYY-MM-DD HH24:MI') as formatted_cmt_date
+		  from (
+		        select row_number() over (order by cmt_num desc) num
+		             , a.*,mem.m_img
+		          from all_comments a join member mem on a.cmt_id=mem.m_id where comm_num=#{comm_num}
+		        ) t
+		 where num between #{startList} and #{endList}
+	</select>	
+
+	<insert id="CMT_INSERT" parameterType="com.peachmarket.opticyellow.allcmt.model.AllCmtVO">
+		insert into all_comments(cmt_num,comm_num,cmt_id,cmt_content)
+		values(all_cmt_seq.nextval,#{comm_num},#{cmt_id},#{cmt_content})
+	</insert>
+	
+	<update id="CMT_UPDATE" parameterType="com.peachmarket.opticyellow.allcmt.model.AllCmtVO">
+		update all_comments set cmt_content = #{cmt_content} where cmt_num = #{cmt_num}
+	</update>
+
+	<update id="CMT_COUNT" parameterType="com.peachmarket.opticyellow.allcommu.model.AllCommuVO">
+		update all_community set comm_cmt = comm_cmt+1 where comm_num = #{comm_num}
+	</update>
+
+	<delete id="CMT_DELETE" parameterType="com.peachmarket.opticyellow.allcmt.model.AllCmtVO">
+		delete from all_comments where cmt_num = #{cmt_num}
+	</delete>
+	
+	<update id="CMT_LIKES_DOWN" parameterType="com.peachmarket.opticyellow.allcmt.model.AllCmtLikeVO">
+		update all_comments set cmt_likes = cmt_likes-1 where cmt_num = #{cmt_num}
+	</update>
+	
+	<update id="CMT_LIKES_UP" parameterType="com.peachmarket.opticyellow.allcmt.model.AllCmtLikeVO">
+		update all_comments set cmt_likes = cmt_likes+1 where cmt_num = #{cmt_num}
+	</update>	
+	
+	<insert id="CMT_DISLIKE_IN" parameterType="com.peachmarket.opticyellow.allcmt.model.AllCmtLikeVO">
+		insert into all_cmt_like(like_num, cmt_num, like_user, likes)
+		values(cmtlike_num_seq.nextval,#{cmt_num},#{like_user},-1)
+	</insert>
+
+	<insert id="CMT_LIKE_IN" parameterType="com.peachmarket.opticyellow.allcmt.model.AllCmtLikeVO">
+		insert into all_cmt_like(like_num, cmt_num, like_user, likes)
+		values(cmtlike_num_seq.nextval,#{cmt_num},#{like_user},1)
+	</insert>
+
+	<update id="CMT_DISLIKE_UPD" parameterType="com.peachmarket.opticyellow.allcmt.model.AllCmtLikeVO">
+		update all_cmt_like set likes=-1 where cmt_num = #{cmt_num} and like_user = #{like_user}
+	</update>	
+	
+	<update id="CMT_LIKE_UPD" parameterType="com.peachmarket.opticyellow.allcmt.model.AllCmtLikeVO">
+		update all_cmt_like set likes=1 where cmt_num = #{cmt_num} and like_user = #{like_user}
+	</update>
+	
+</mapper>
